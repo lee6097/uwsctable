@@ -291,8 +291,14 @@
           </label>
         </div>
 
-        <label>개수 입력
-          <input type="text" id="countInput" placeholder="예: 5개" required />
+        <label>개수 입력 (숫자만)
+          <input
+            type="number"
+            id="countInput"
+            placeholder="예: 32"
+            min="1"
+            required
+          />
         </label>
 
         <button type="submit" id="submitBtn">전송하기</button>
@@ -675,7 +681,7 @@
       }
 
       const item =
-        `${itemName} / ${count}`;
+        `${itemName} / ${count}개`;
 
       openConfirm({
 
