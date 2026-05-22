@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>의왕시니어클럽 찬란한식탁 오후반 주문 현황판</title>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+    :root {
+      --bg: #fff6ed;
+      --card-bg: #ffe0b2;
+      --card-border: #ffb74d;
+      --text: #4e342e;
+      --accent: #ff8a50;
+      --accent-dark: #ff7043;
+      --accent-light: #ffcc80;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      padding: 24px;
+      max-width: 760px;
+      margin: auto;
+      background: var(--bg);
+      color: var(--text);
+      position: relative;
+    }
+
+    h1 {
+      text-align: center;
+      color: #d84315;
+      margin-bottom: 28px;
+      font-size: 2rem;
+    }
+
+    #refreshBtn {
+      position: absolute;
+      top: 24px;
+      right: 24px;
+      background: var(--accent-light);
+      color: #6d4c41;
+      border: none;
+      border-radius: 10px;
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+    }
+
+    #refreshBtn:hover {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    #list { margin-bottom: 30px; }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      padding: 18px 20px;
+      margin-bottom: 18px;
+      border-radius: 14px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .card h3 {
+      margin: 0 0 10px;
+      font-size: 1.3rem;
+      color: #c24e10;
+    }
+
+    ul {
+      list-style: none;
+      margin: 0;
+      padding-left: 0;
+    }
+
+    li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin: 10px 0;
+      font-size: 1rem;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(255,255,255,0.4);
+    }
+
+    li:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .item-info { flex: 1; }
+
+    .item-name {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .item-time {
+      display: block;
+      color: #8d6e63;
+      font-size: 0.85rem;
+    }
+
+    .delete-btn {
+      font-size: 0.8rem;
+      padding: 3px 8px;
+      color: #fff;
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .delete-btn:hover {
+      background: var(--accent-dark);
+    }
+
+    #openModal {
+      display: block;
+      margin: 34px auto;
+      font-size: 1.25rem;
+      padding: 18px 38px;
+      background: #ff7043;
+      color: #fff;
+      border: none;
+      border-radius: 16px;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(255,112,67,0.35);
+    }
+
+    #openModal:hover {
+      background: #ff5722;
+    }
+
+    #modal,
+    #confirmModal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 999;
+    }
+
+    #modalContent,
+    #confirmContent {
+      background: #fff;
+      width: 90%;
+      max-width: 440px;
+      border-radius: 18px;
+      padding: 28px 26px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+    }
+
+    #modalContent h2,
+    #confirmContent h3 {
+      margin: 0 0 12px;
+      color: #d84315;
+    }
+
+    label {
+      display: block;
+      font-size: 1.05rem;
+      margin-top: 16px;
+    }
+
+    select,
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 13px;
+      font-size: 1rem;
+      margin-top: 8px;
+      border-radius: 10px;
+      border: 1px solid var(--accent-light);
+      background: #fffaf2;
+    }
+
+    #modalContent button,
+    #confirmButtons button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 14px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+
+    #submitBtn,
+    #confirmYes {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    #submitBtn:hover,
+    #confirmYes:hover {
+      background: var(--accent-dark);
+    }
+
+    #closeModal,
+    #confirmNo {
+      background: #eceff1;
+      color: #5d4037;
+    }
+
+    #confirmButtons {
+      display: flex;
+      gap: 12px;
+    }
+
+    @media (max-width: 520px) {
+      li {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .delete-btn {
+        align-self: flex-end;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <button id="refreshBtn">새로고침</button>
+
+  <h1>의왕시니어클럽 찬란한식탁 오후반 주문 현황판</h1>
+
+  <div id="list"></div>
+
+  <button id="openModal">주문하기</button>
+
+  <!-- 입력 모달 -->
+  <div id="modal">
+    <div id="modalContent">
+
+      <h2>주문 입력</h2>
+
+      <form id="shortageForm">
+
+        <label>어느 판매처입니까?
+          <select id="cafeSelect" required>
+            <option value="">선택하세요</option>
+
+            <option>[실버카페] 다향</option>
+            <option>[실버카페] 꿈볶는카페</option>
+            <option>[디저트카페] 마루</option>
+            <option>[더플러스카페] 부곡</option>
+            <option>[더플러스카페] 포일어울림</option>
+            <option>[더플러스카페] 평생학습관</option>
+            <option>[더플러스카페] 도서관</option>
+
+            <option>시청</option>
+            <option>장터</option>
+            <option value="기타">기타</option>
+          </select>
+        </label>
+
+        <div id="customCafeWrapper" style="display:none;">
+          <label>기타 판매처 입력
+            <input type="text" id="customCafeInput" placeholder="판매처 입력" />
+          </label>
+        </div>
+
+        <label>주문 품목은 무엇입니까?
+          <select id="itemSelect" required>
+            <option value="">선택하세요</option>
+            <option>에너지바</option>
+            <option>호두강정</option>
+            <option>아망드쇼콜라</option>
+            <option value="기타">기타</option>
+          </select>
+        </label>
+
+        <div id="customItemWrapper" style="display:none;">
+          <label>기타 품목 입력
+            <input type="text" id="customItemInput" placeholder="품목 입력" />
+          </label>
+        </div>
+
+        <label>개수 입력
+          <input type="text" id="countInput" placeholder="예: 5개" required />
+        </label>
+
+        <button type="submit" id="submitBtn">전송하기</button>
+        <button type="button" id="closeModal">닫기</button>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- 확인 모달 -->
+  <div id="confirmModal">
+    <div id="confirmContent">
+
+      <h3 id="confirmTitle">확인</h3>
+
+      <p id="confirmMessage"></p>
+
+      <div id="confirmPasswordWrapper" style="display:none;">
+        <label>
+          비밀번호를 입력해주세요.
+          <input type="password" id="confirmPassword" placeholder="****" maxlength="10" />
+        </label>
+      </div>
+
+      <div id="confirmButtons">
+        <button id="confirmNo">취소</button>
+        <button id="confirmYes">확인</button>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+
+    const SUPABASE_URL = 'https://hhbmypcshfbjrqpeqril.supabase.co';
+
+    const SUPABASE_ANON_KEY =
+      '여기에_네_anon_key';
+
+    const supa = supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY
+    );
+
+    const listDiv = document.getElementById('list');
+    const modal = document.getElementById('modal');
+    const form = document.getElementById('shortageForm');
+
+    const openModalBtn = document.getElementById('openModal');
+    const closeModalBtn = document.getElementById('closeModal');
+    const refreshBtn = document.getElementById('refreshBtn');
+
+    const confirmModal = document.getElementById('confirmModal');
+    const confirmTitle = document.getElementById('confirmTitle');
+    const confirmMessage = document.getElementById('confirmMessage');
+    const confirmYes = document.getElementById('confirmYes');
+    const confirmNo = document.getElementById('confirmNo');
+
+    const confirmPasswordWrapper =
+      document.getElementById('confirmPasswordWrapper');
+
+    const confirmPasswordInput =
+      document.getElementById('confirmPassword');
+
+    const cafeSelect = document.getElementById('cafeSelect');
+    const customCafeWrapper =
+      document.getElementById('customCafeWrapper');
+
+    const customCafeInput =
+      document.getElementById('customCafeInput');
+
+    const itemSelect = document.getElementById('itemSelect');
+    const customItemWrapper =
+      document.getElementById('customItemWrapper');
+
+    const customItemInput =
+      document.getElementById('customItemInput');
+
+    const countInput =
+      document.getElementById('countInput');
+
+    let confirmCallback = null;
+    let confirmRequiresPassword = false;
+
+    const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
+
+    function toKST(date) {
+      return new Date(
+        date.toLocaleString('en-US', {
+          timeZone: 'Asia/Seoul'
+        })
+      );
+    }
+
+    function formatKSTWithRelative(timestamp) {
+
+      const targetUTC = new Date(timestamp);
+      const target = toKST(targetUTC);
+      const now = toKST(new Date());
+
+      const year = target.getFullYear();
+      const month = String(target.getMonth() + 1).padStart(2, '0');
+      const day = String(target.getDate()).padStart(2, '0');
+
+      const hour = String(target.getHours()).padStart(2, '0');
+      const minute = String(target.getMinutes()).padStart(2, '0');
+
+      const weekday = weekdays[target.getDay()];
+
+      const diffMs = now - target;
+
+      const diffDays =
+        Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+      let relative = '';
+
+      if (diffDays === 0) {
+        relative = '오늘';
+      } else if (diffDays === 1) {
+        relative = '어제';
+      } else {
+        relative = `${diffDays}일 전`;
+      }
+
+      return `${year}/${month}/${day}(${weekday}) ${hour}:${minute} (${relative})`;
+    }
+
+    function openConfirm({
+      title,
+      message,
+      onConfirm,
+      requirePassword = false
+    }) {
+
+      confirmTitle.textContent = title;
+      confirmMessage.innerHTML = message;
+
+      confirmModal.style.display = 'flex';
+
+      confirmCallback = onConfirm;
+      confirmRequiresPassword = requirePassword;
+
+      confirmPasswordInput.value = '';
+
+      confirmPasswordWrapper.style.display =
+        requirePassword ? 'block' : 'none';
+    }
+
+    confirmYes.addEventListener('click', async () => {
+
+      if (confirmRequiresPassword) {
+
+        const password =
+          confirmPasswordInput.value.trim();
+
+        if (password !== '7988') {
+          alert('비밀번호가 틀렸습니다.');
+          return;
+        }
+      }
+
+      if (confirmCallback) {
+        await confirmCallback();
+      }
+
+      confirmModal.style.display = 'none';
+
+      confirmCallback = null;
+      confirmRequiresPassword = false;
+    });
+
+    confirmNo.addEventListener('click', () => {
+
+      confirmModal.style.display = 'none';
+
+      confirmCallback = null;
+      confirmRequiresPassword = false;
+    });
+
+    confirmModal.addEventListener('click', (e) => {
+
+      if (e.target === confirmModal) {
+
+        confirmModal.style.display = 'none';
+
+        confirmCallback = null;
+        confirmRequiresPassword = false;
+      }
+    });
+
+    cafeSelect.addEventListener('change', () => {
+
+      if (cafeSelect.value === '기타') {
+
+        customCafeWrapper.style.display = 'block';
+
+      } else {
+
+        customCafeWrapper.style.display = 'none';
+        customCafeInput.value = '';
+      }
+    });
+
+    itemSelect.addEventListener('change', () => {
+
+      if (itemSelect.value === '기타') {
+
+        customItemWrapper.style.display = 'block';
+
+      } else {
+
+        customItemWrapper.style.display = 'none';
+        customItemInput.value = '';
+      }
+    });
+
+    function renderShortages(data) {
+
+      listDiv.innerHTML = '';
+
+      if (!data || data.length === 0) {
+
+        listDiv.innerHTML =
+          '<p style="text-align:center; color:#8d6e63;">현재 주문 내역이 없습니다.</p>';
+
+        return;
+      }
+
+      const grouped = data.reduce((acc, row) => {
+
+        if (!acc[row.cafe]) {
+          acc[row.cafe] = [];
+        }
+
+        acc[row.cafe].push(row);
+
+        return acc;
+
+      }, {});
+
+      const cafeEntries = Object.entries(grouped)
+        .map(([cafe, items]) => {
+
+          items.sort(
+            (a, b) =>
+              new Date(a.created_at) -
+              new Date(b.created_at)
+          );
+
+          const oldest =
+            items[0]?.created_at || null;
+
+          return {
+            cafe,
+            items,
+            oldest
+          };
+        })
+
+        .sort(
+          (a, b) =>
+            new Date(a.oldest) -
+            new Date(b.oldest)
+        );
+
+      cafeEntries.forEach(({ cafe, items }) => {
+
+        const card = document.createElement('div');
+
+        card.className = 'card';
+
+        card.innerHTML = `<h3>${cafe}</h3>`;
+
+        const ul = document.createElement('ul');
+
+        items.forEach((item) => {
+
+          const li = document.createElement('li');
+
+          li.innerHTML = `
+            <div class="item-info">
+              <span class="item-name">${item.item}</span>
+              <span class="item-time">
+                ${formatKSTWithRelative(item.created_at)}
+              </span>
+            </div>
+
+            <button class="delete-btn">삭제</button>
+          `;
+
+          li.querySelector('button')
+            .addEventListener('click', () => {
+
+              openConfirm({
+
+                title: '삭제 확인',
+
+                message:
+                  `<strong>${item.item}</strong>을(를) 삭제하시겠습니까?<br>※ 비밀번호가 필요합니다.`,
+
+                requirePassword: true,
+
+                onConfirm: async () => {
+
+                  const { error } =
+                    await supa
+                      .from('shortages')
+                      .delete()
+                      .eq('id', item.id);
+
+                  if (error) {
+
+                    alert(
+                      '삭제 중 오류 발생: ' +
+                      error.message
+                    );
+
+                  } else {
+
+                    loadData();
+                  }
+                }
+              });
+            });
+
+          ul.appendChild(li);
+        });
+
+        card.appendChild(ul);
+        listDiv.appendChild(card);
+      });
+    }
+
+    async function loadData() {
+
+      const { data, error } =
+        await supa
+          .from('shortages')
+          .select('*')
+          .order('created_at', {
+            ascending: true
+          });
+
+      if (error) {
+
+        console.error('데이터 조회 오류:', error);
+
+        listDiv.innerHTML =
+          '<p style="text-align:center;color:#e53935;">데이터를 불러오지 못했어요.</p>';
+
+        return;
+      }
+
+      renderShortages(data);
+    }
+
+    form.addEventListener('submit', (e) => {
+
+      e.preventDefault();
+
+      let cafe = cafeSelect.value;
+
+      if (cafe === '기타') {
+        cafe = customCafeInput.value.trim();
+      }
+
+      let itemName = itemSelect.value;
+
+      if (itemName === '기타') {
+        itemName = customItemInput.value.trim();
+      }
+
+      const count =
+        countInput.value.trim();
+
+      if (!cafe || !itemName || !count) {
+        return;
+      }
+
+      const item =
+        `${itemName} / ${count}`;
+
+      openConfirm({
+
+        title: '주문 전송',
+
+        message:
+          `다음 내용으로 전송할까요?<br>
+          <strong>판매처:</strong> ${cafe}<br>
+          <strong>주문:</strong> ${item}`,
+
+        onConfirm: async () => {
+
+          const { error } =
+            await supa
+              .from('shortages')
+              .insert({
+                cafe,
+                item
+              });
+
+          if (error) {
+
+            console.error('입력 오류:', error);
+
+            alert(
+              '저장 중 오류가 발생했습니다: ' +
+              error.message
+            );
+
+            return;
+          }
+
+          form.reset();
+
+          customCafeWrapper.style.display = 'none';
+          customItemWrapper.style.display = 'none';
+
+          modal.style.display = 'none';
+
+          loadData();
+        }
+      });
+    });
+
+    openModalBtn.addEventListener('click', () => {
+      modal.style.display = 'flex';
+    });
+
+    closeModalBtn.addEventListener('click', () => {
+      modal.style.display = 'none';
+    });
+
+    modal.addEventListener('click', (e) => {
+
+      if (e.target === modal) {
+        modal.style.display = 'none';
+      }
+    });
+
+    refreshBtn.addEventListener('click', () => {
+      loadData();
+    });
+
+    loadData();
+
+  </script>
+
+</body>
+</html>
